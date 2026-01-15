@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { getDistributionData } from './actions'
+import { CompanyTooltip } from './company-tooltip'
+import { CopyMessageButton } from './copy-message-button'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -160,7 +162,7 @@ export default function DistributionPage() {
                   <div className="divide-y divide-slate-100">
                     {items.map((item, index) => (
                       <div key={index} className="p-6 hover:bg-slate-50/50 transition-colors">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
                           <div className="space-y-2">
                             <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
                               <Hash className="h-4 w-4" />
@@ -180,7 +182,17 @@ export default function DistributionPage() {
                               <Building2 className="h-4 w-4" />
                               ID da Empresa
                             </div>
-                            <p className="text-lg font-semibold text-slate-900">{item.user_company_id}</p>
+                            <p className="text-lg font-semibold text-slate-900">
+                              <CompanyTooltip companyId={item.user_company_id} />
+                            </p>
+                          </div>
+                          <div className="flex justify-end">
+                            <CopyMessageButton 
+                              cnj={cnj}
+                              distributionId={item.distribution_id}
+                              distributionDate={item.distribution_date}
+                              userCompanyId={item.user_company_id}
+                            />
                           </div>
                         </div>
                       </div>

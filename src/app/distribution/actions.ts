@@ -96,3 +96,39 @@ export async function getDistributionData(cnj: string): Promise<{ success: boole
     return { success: false, error: 'Erro interno do servidor' }
   }
 }
+
+export async function getCompanyName(user_company_id: number): Promise<{ success: boolean; name?: string; error?: string }> {
+  const token = process.env.DIGESTO_API_TOKEN
+
+  if (!token) {
+    return { success: false, error: 'API token not configured' }
+  }
+
+  const url = `https://op.digesto.com.br/api/admin/user_company/${user_company_id}`
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+
+    if (!response.ok) {
+        return { success: false, error: 'Erro ao consultar empresa' }
+    }
+
+    const json = await response.json()
+    
+    if (json && json.name) {
+        return { success: true, name: json.name }
+    }
+
+    return { success: false, error: 'Nome da empresa não encontrado' }
+
+  } catch (error) {
+    console.error("Error fetching company name:", error)
+    return { success: false, error: 'Erro interno do servidor' }
+  }
+}
