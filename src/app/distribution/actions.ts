@@ -3,6 +3,7 @@
 interface DistributionData {
   cnj: string
   distribution_id: string
+  distribution_sent: string
   distribution_date: string
   user_company_id: number
 }
@@ -13,6 +14,9 @@ interface DigestoResponse {
     $date: number
   }
   user_company_id: number
+  data?: {
+    distribuicaoData?: string
+  }[]
 }
 
 export async function getDistributionData(cnj: string): Promise<{ success: boolean; data?: DistributionData[]; error?: string }> {
@@ -76,11 +80,19 @@ export async function getDistributionData(cnj: string): Promise<{ success: boole
 
         // Format date
         const timestamp = item.created_at?.$date
-        const distribution_date = timestamp ? new Date(timestamp).toLocaleString('pt-BR') : 'N/A'
+        const distribution_sent = timestamp ? new Date(timestamp).toLocaleString('pt-BR') : 'N/A'
+        
+        // Extract distribution_date from nested data array
+        const rawDate = (item.data && item.data.length > 0 && item.data[0].distribuicaoData) 
+            ? item.data[0].distribuicaoData 
+            : null
+            
+        const distribution_date = rawDate ? rawDate.split('-').reverse().join('/') : 'N/A'
 
         return {
             cnj: targetNumber,
             distribution_id,
+            distribution_sent,
             distribution_date,
             user_company_id: item.user_company_id
         }

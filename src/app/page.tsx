@@ -54,16 +54,16 @@ export default function Page() {
           </CardFooter>
         </Card>
 
-        {/* Card 3: Distribuições Não Recebidas */}
+        {/* Card 3: Análisar Destribuições de processos*/}
         <Link href="/distribution" className="contents">
           <Card className="flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-sidebar-primary/50 cursor-pointer group">
             <CardHeader className="pb-2">
               <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-sidebar-accent text-sidebar-primary">
                 <Inbox className="h-6 w-6" />
               </div>
-              <CardTitle className="text-xl">Distribuições Não Recebidas</CardTitle>
+              <CardTitle className="text-xl">Análise de Distribuições</CardTitle>
               <CardDescription className="mt-2 text-base">
-                Valide a data e a hora de uma distribuição
+                Verifique a data e para quem foi distribuído o processo.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1" />
@@ -75,7 +75,28 @@ export default function Page() {
           </Card>
         </Link>
 
-        {/* Card 4: Em Desenvolvimento */}
+        {/* Card 4: Validador de Regex */}
+        <Link href="/regex-validator" className="contents">
+          <Card className="flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-sidebar-primary/50 cursor-pointer group">
+            <CardHeader className="pb-2">
+              <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-sidebar-accent text-sidebar-primary">
+                <Settings className="h-6 w-6" />
+              </div>
+              <CardTitle className="text-xl">Validador de Regex</CardTitle>
+              <CardDescription className="mt-2 text-base">
+                Valide partes do processo contra os padrões da empresa.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1" />
+            <CardFooter>
+              <Button variant="ghost" className="p-0 font-semibold text-sidebar-primary hover:bg-transparent hover:text-sidebar-primary/80">
+                Abrir ferramenta <span className="ml-2">›</span>
+              </Button>
+            </CardFooter>
+          </Card>
+        </Link>
+
+        {/* Card 5: Em Desenvolvimento */}
         <Card className="flex flex-col border-dashed bg-muted/50">
           <CardHeader className="pb-2 items-center text-center">
             <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-muted-foreground">

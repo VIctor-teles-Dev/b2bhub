@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Home, Search, FileText, Inbox } from "lucide-react"
+import { Home, Search, FileText, Inbox, Settings } from "lucide-react"
 
 import {
   Sidebar,
@@ -35,6 +35,11 @@ const items = [
     title: "Análise de Relatórios",
     url: "#",
     icon: FileText,
+  },
+  {
+    title: "Validador de Regex",
+    url: "/regex-validator",
+    icon: Settings,
   },
 ]
 

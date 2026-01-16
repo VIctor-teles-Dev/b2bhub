@@ -13,8 +13,37 @@ import Link from 'next/link'
 interface DistributionResult {
   cnj: string
   distribution_id: string
+  distribution_sent: string
   distribution_date: string
   user_company_id: number
+}
+
+function parseDate(dateStr: string): Date | null {
+  if (!dateStr || dateStr === 'N/A') return null
+  // Format: DD/MM/YYYY
+  const parts = dateStr.split('/')
+  if (parts.length !== 3) return null
+  return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]))
+}
+
+function parseDateTime(dateTimeStr: string): Date | null {
+  if (!dateTimeStr || dateTimeStr === 'N/A') return null
+  // Format: DD/MM/YYYY, HH:mm:ss
+  const [datePart] = dateTimeStr.split(',')
+  return parseDate(datePart)
+}
+
+function isSentBeforeDistributed(sent: string, distributed: string): boolean {
+  const sentDate = parseDateTime(sent)
+  const distDate = parseDate(distributed)
+
+  if (!sentDate || !distDate) return false
+  
+  // Reset hours to compare only dates
+  sentDate.setHours(0, 0, 0, 0)
+  distDate.setHours(0, 0, 0, 0)
+
+  return sentDate < distDate
 }
 
 export default function DistributionPage() {
@@ -160,7 +189,10 @@ export default function DistributionPage() {
                 </div>
                 <CardContent className="p-0">
                   <div className="divide-y divide-slate-100">
-                    {items.map((item, index) => (
+                    {items.map((item, index) => {
+                      const isDiscrepancy = isSentBeforeDistributed(item.distribution_sent, item.distribution_date)
+                      
+                      return (
                       <div key={index} className="p-6 hover:bg-slate-50/50 transition-colors">
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
                           <div className="space-y-2">
@@ -173,9 +205,17 @@ export default function DistributionPage() {
                           <div className="space-y-2">
                             <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
                               <Calendar className="h-4 w-4" />
-                              Data
+                              Data de Envio
                             </div>
-                            <p className="text-lg font-semibold text-slate-900">{item.distribution_date}</p>
+                            <p className={`text-lg font-semibold ${isDiscrepancy ? 'text-red-600' : 'text-slate-900'}`}>
+                              {item.distribution_sent}
+                            </p>
+                            <p className="text-xs text-slate-400">Distribuído: {item.distribution_date}</p>
+                            {isDiscrepancy && (
+                              <p className="text-xs text-red-500 font-medium mt-1">
+                                A distribuição não foi enviada porque o processo foi distribuído depois da data que a distribuição foi solicitada
+                              </p>
+                            )}
                           </div>
                           <div className="space-y-2">
                             <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
@@ -191,12 +231,14 @@ export default function DistributionPage() {
                               cnj={cnj}
                               distributionId={item.distribution_id}
                               distributionDate={item.distribution_date}
+                              distributionSent={item.distribution_sent}
                               userCompanyId={item.user_company_id}
+                              isDiscrepancy={isDiscrepancy}
                             />
                           </div>
                         </div>
                       </div>
-                    ))}
+                    )})}
                   </div>
                 </CardContent>
               </Card>
