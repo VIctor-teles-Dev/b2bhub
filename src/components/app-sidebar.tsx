@@ -22,20 +22,11 @@ const items = [
     isActive: true,
   },
   {
-    title: "Tribunal por CNJ",
-    url: "/court",
+    title: "Análise de Distribuições",
+    url: "/distribution",
     icon: Search,
   },
-  {
-    title: "Distribuições Não Recebidas",
-    url: "/distribution",
-    icon: Inbox,
-  },
-  {
-    title: "Análise de Relatórios",
-    url: "#",
-    icon: FileText,
-  },
+
   {
     title: "Validador de Regex",
     url: "/regex-validator",
@@ -67,7 +58,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarFooter className="p-4">
         <div className="text-xs text-muted-foreground text-center">
-          © 2024 JUS SOLUÇÕES
+          © 2026 JUS SOLUÇÕES
         </div>
       </SidebarFooter>
       <SidebarRail />

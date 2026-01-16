@@ -14,47 +14,11 @@ export default function Page() {
       </div>
       
       <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-        {/* Card 1: Encontrar Tribunal por CNJ */}
-        <Link href="/court" className="contents">
-          <Card className="flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-sidebar-primary/50 cursor-pointer group">
-            <CardHeader className="pb-2">
-              <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-sidebar-accent text-sidebar-primary">
-                <FileSearch className="h-6 w-6" />
-              </div>
-              <CardTitle className="text-xl">Encontrar Tribunal por CNJ</CardTitle>
-              <CardDescription className="mt-2 text-base">
-                Identifique instantaneamente a qual tribunal pertence um número de processo.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1" />
-            <CardFooter>
-              <Button variant="ghost" className="p-0 font-semibold text-sidebar-primary hover:bg-transparent hover:text-sidebar-primary/80">
-                Abrir ferramenta <span className="ml-2">›</span>
-              </Button>
-            </CardFooter>
-          </Card>
-        </Link>
+    
+    
+        
 
-        {/* Card 2: Análise de Relatórios */}
-        <Card className="flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-sidebar-primary/50 cursor-pointer group">
-          <CardHeader className="pb-2">
-            <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-sidebar-accent text-sidebar-primary">
-              <BarChart className="h-6 w-6" />
-            </div>
-            <CardTitle className="text-xl">Análise de Relatórios</CardTitle>
-            <CardDescription className="mt-2 text-base">
-              Automatize a leitura e extração de dados de relatórios jurídicos complexos.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex-1" />
-          <CardFooter>
-            <Button variant="ghost" className="p-0 font-semibold text-sidebar-primary hover:bg-transparent hover:text-sidebar-primary/80">
-              Abrir ferramenta <span className="ml-2">›</span>
-            </Button>
-          </CardFooter>
-        </Card>
-
-        {/* Card 3: Análisar Destribuições de processos*/}
+        {/* Card 1: Análisar Destribuições de processos*/}
         <Link href="/distribution" className="contents">
           <Card className="flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-sidebar-primary/50 cursor-pointer group">
             <CardHeader className="pb-2">
@@ -75,7 +39,7 @@ export default function Page() {
           </Card>
         </Link>
 
-        {/* Card 4: Validador de Regex */}
+        {/* Card 2: Validador de Regex */}
         <Link href="/regex-validator" className="contents">
           <Card className="flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-sidebar-primary/50 cursor-pointer group">
             <CardHeader className="pb-2">
