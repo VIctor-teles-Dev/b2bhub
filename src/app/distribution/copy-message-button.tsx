@@ -40,7 +40,7 @@ export function CopyMessageButton({
       const companyName = result.success && result.name ? result.name : 'Empresa Desconhecida'
 
       const greeting = getGreeting()
-      let message = `${greeting}!, tudo bem? \n Analisamos a sua solicitação e notamos que o CNJ (${cnj}) foi distribuído em ${distributionDate} e enviado em ${distributionSent} para ${companyName}(${userCompanyId}) sob o id ${distributionId}`
+      let message = `${greeting}! Tudo bem? \n Analisamos a sua solicitação e notamos que o CNJ (${cnj}) foi distribuído em ${distributionDate} e enviado em ${distributionSent} para ${companyName}(${userCompanyId}) sob o id ${distributionId}`
 
       if (isDiscrepancy) {
         message += `\n \n A distribuição não foi enviada porque o processo foi distribuído depois da data que a distribuição foi solicitada`

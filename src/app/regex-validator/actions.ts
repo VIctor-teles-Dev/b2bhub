@@ -1,8 +1,8 @@
 'use server'
 
-interface RegexResponse {
+interface RegexApiResponse {
   regexps?: string[]
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export async function getRegexPatterns(userCompanyId: string): Promise<{ success: boolean; regexps?: string[]; error?: string }> {
@@ -24,42 +24,20 @@ export async function getRegexPatterns(userCompanyId: string): Promise<{ success
     })
 
     if (!response.ok) {
-      return { success: false, error: 'Erro ao consultar API' }
+      return { success: false, error: 'Erro ao consultar API, por favor verifique o ID da empresa' }
     }
 
-    const json = await response.json()
-    
-    // Assuming the API returns a list of regex strings or an object with a regexps property
-    // Based on user description "JSON de REGEX", it might be a direct array or a property.
-    // I'll handle a few common cases.
+    const json = await response.json() as string[] | RegexApiResponse
     
     let regexps: string[] = []
 
     if (Array.isArray(json)) {
-        // If it's an array of strings
-        if (json.length > 0 && typeof json[0] === 'string') {
-            regexps = json as string[]
-        } else {
-             // If it's an array of objects, maybe extract something? 
-             // For now assuming strings if array.
-             regexps = json.map(item => String(item))
-        }
+        // Handle direct array response
+        regexps = json.filter((item): item is string => typeof item === 'string')
     } else if (json && typeof json === 'object') {
-        if (json.regexps && Array.isArray(json.regexps)) {
-            regexps = json.regexps
-        } else {
-             // Maybe the keys are regexes? or just the values?
-             // Let's assume the user meant the response IS the regexes or contains them.
-             // If the structure is unknown, I'll return the whole JSON as string for debugging if needed,
-             // but for the "happy path" I'll look for 'regexps' key as per URL param 'regexps=true'.
-             // If not found, I'll try to use the keys or values if they look like regexes.
-             // Actually, let's just return the keys if it's a dictionary-like object and 'regexps' is missing.
-             // But 'regexps=true' suggests a specific field.
-             
-             // Fallback: check if 'regexps' exists
-             if (json.regexps) {
-                 regexps = json.regexps
-             }
+        // Handle object response with regexps property
+        if (Array.isArray(json.regexps)) {
+            regexps = json.regexps.filter((item): item is string => typeof item === 'string')
         }
     }
 

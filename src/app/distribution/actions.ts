@@ -1,6 +1,8 @@
 'use server'
 
-interface DistributionData {
+import { extractAndCleanCnj, formatCnj } from '@/lib/cnj-utils'
+
+export interface DistributionData {
   cnj: string
   distribution_id: string
   distribution_sent: string
@@ -8,7 +10,7 @@ interface DistributionData {
   user_company_id: number
 }
 
-interface DigestoResponse {
+interface DigestoResponseItem {
   $uri: string
   created_at: {
     $date: number
@@ -19,6 +21,12 @@ interface DigestoResponse {
   }[]
 }
 
+// Union type to handle potential API response variations
+type DigestoApiResponse = 
+  | DigestoResponseItem[] 
+  | { items: DigestoResponseItem[] } 
+  | DigestoResponseItem
+
 export async function getDistributionData(cnj: string): Promise<{ success: boolean; data?: DistributionData[]; error?: string }> {
   const token = process.env.DIGESTO_API_TOKEN
 
@@ -26,22 +34,19 @@ export async function getDistributionData(cnj: string): Promise<{ success: boole
     return { success: false, error: 'API token not configured' }
   }
 
-  // Format CNJ: Remove non-numeric, then apply mask xxxxxxx-xx.xxxx.x.xx.xxxx
-  const cleanCnj = cnj.replace(/\D/g, '')
+  const cleanCnj = extractAndCleanCnj(cnj)
   
-  // Mask: 0000000-00.0000.0.00.0000
-  const formattedCnj = cleanCnj.replace(
-    /^(\d{7})(\d{2})(\d{4})(\d{1})(\d{2})(\d{4})$/,
-    "$1-$2.$3.$4.$5.$6"
-  )
-
-  const targetNumber = formattedCnj === cleanCnj && cleanCnj.length === 20 ? 
-    cleanCnj.replace(/^(\d{7})(\d{2})(\d{4})(\d{1})(\d{2})(\d{4})$/, "$1-$2.$3.$4.$5.$6") : 
-    formattedCnj
+  if (!cleanCnj) {
+    return { success: false }
+  }
+  
+  const targetNumber = formatCnj(cleanCnj)
 
   const url = `https://op.digesto.com.br/api/monitored_event?where={"evt_type":4,"target_number":"${targetNumber}"}`
 
   try {
+    console.log("Fetching URL:", url)
+
     const response = await fetch(url, {
       method: 'GET',
       headers: {
@@ -54,18 +59,18 @@ export async function getDistributionData(cnj: string): Promise<{ success: boole
         return { success: false, error: 'Erro ao consultar API' }
     }
 
-    const json = await response.json()
+    const json = await response.json() as DigestoApiResponse
 
-    let items: DigestoResponse[] = []
+    let items: DigestoResponseItem[] = []
 
     if (Array.isArray(json)) {
         items = json
     } else if (json && typeof json === 'object') {
          if ('items' in json && Array.isArray(json.items)) {
              items = json.items
-         } else {
-             // Single object
-             items = [json as DigestoResponse]
+         } else if ('$uri' in json) {
+             // Single object that looks like an item
+             items = [json as DigestoResponseItem]
          }
     }
 

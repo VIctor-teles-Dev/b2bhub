@@ -5,8 +5,8 @@ import { FileSearch, BarChart, Settings, Inbox } from "lucide-react"
 
 export default function Page() {
   return (
-    <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-      <div className="mb-8 space-y-2">
+    <div className="flex flex-1 flex-col gap-4 p-4 pt-5">
+      <div className="mb-8 space-y-2 ">
         <h1 className="text-3xl font-bold tracking-tight text-sidebar-foreground">Painel de Automação</h1>
         <p className="text-muted-foreground">
           Centralize as suas operações e agilize o fluxo jurídico da Jus Soluções.

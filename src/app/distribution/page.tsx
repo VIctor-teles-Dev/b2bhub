@@ -1,55 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { getDistributionData } from './actions'
-import { CompanyTooltip } from './company-tooltip'
-import { CopyMessageButton } from './copy-message-button'
+import { getDistributionData, type DistributionData } from './actions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Search, ArrowLeft, Info, Calendar, Building2, Hash } from 'lucide-react'
+import { Loader2, Search, ArrowLeft, Info } from 'lucide-react'
 import Link from 'next/link'
-
-interface DistributionResult {
-  cnj: string
-  distribution_id: string
-  distribution_sent: string
-  distribution_date: string
-  user_company_id: number
-}
-
-function parseDate(dateStr: string): Date | null {
-  if (!dateStr || dateStr === 'N/A') return null
-  // Format: DD/MM/YYYY
-  const parts = dateStr.split('/')
-  if (parts.length !== 3) return null
-  return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]))
-}
-
-function parseDateTime(dateTimeStr: string): Date | null {
-  if (!dateTimeStr || dateTimeStr === 'N/A') return null
-  // Format: DD/MM/YYYY, HH:mm:ss
-  const [datePart] = dateTimeStr.split(',')
-  return parseDate(datePart)
-}
-
-function isSentBeforeDistributed(sent: string, distributed: string): boolean {
-  const sentDate = parseDateTime(sent)
-  const distDate = parseDate(distributed)
-
-  if (!sentDate || !distDate) return false
-  
-  // Reset hours to compare only dates
-  sentDate.setHours(0, 0, 0, 0)
-  distDate.setHours(0, 0, 0, 0)
-
-  return sentDate < distDate
-}
+import { DistributionCard } from '@/components/distribution/distribution-card'
 
 export default function DistributionPage() {
   const [cnjInput, setCnjInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [results, setResults] = useState<DistributionResult[]>([])
+  const [results, setResults] = useState<DistributionData[]>([])
   const [errors, setErrors] = useState<string[]>([])
 
   const handleSearch = async () => {
@@ -65,7 +28,7 @@ export default function DistributionPage() {
     // Remove duplicates
     const uniqueCnjs = Array.from(new Set(cnjs))
 
-    const newResults: DistributionResult[] = []
+    const newResults: DistributionData[] = []
     const newErrors: string[] = []
 
     try {
@@ -98,7 +61,7 @@ export default function DistributionPage() {
     }
     acc[curr.cnj].push(curr)
     return acc
-  }, {} as Record<string, DistributionResult[]>)
+  }, {} as Record<string, DistributionData[]>)
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 py-12">
@@ -131,7 +94,7 @@ export default function DistributionPage() {
                 <textarea
                   id="cnj"
                   className="w-full min-h-[120px] p-4 text-base bg-slate-50 border border-slate-100 focus:ring-2 focus:ring-[#0A4D3C]/20 focus:border-[#0A4D3C] rounded-xl outline-none transition-all resize-y font-mono text-slate-600 placeholder:text-slate-300"
-                  placeholder="Cole os números dos processos aqui (separados por espaço, vírgula ou uma nova linha)..."
+                  placeholder="Cole os números dos processos aqui (separados por vírgula ou uma nova linha)..."
                   value={cnjInput}
                   onChange={(e) => setCnjInput(e.target.value)}
                 />
@@ -189,56 +152,9 @@ export default function DistributionPage() {
                 </div>
                 <CardContent className="p-0">
                   <div className="divide-y divide-slate-100">
-                    {items.map((item, index) => {
-                      const isDiscrepancy = isSentBeforeDistributed(item.distribution_sent, item.distribution_date)
-                      
-                      return (
-                      <div key={index} className="p-6 hover:bg-slate-50/50 transition-colors">
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                              <Hash className="h-4 w-4" />
-                              ID da Distribuição
-                            </div>
-                            <p className="text-lg font-semibold text-slate-900">{item.distribution_id}</p>
-                          </div>
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                              <Calendar className="h-4 w-4" />
-                              Data de Envio
-                            </div>
-                            <p className={`text-lg font-semibold ${isDiscrepancy ? 'text-red-600' : 'text-slate-900'}`}>
-                              {item.distribution_sent}
-                            </p>
-                            <p className="text-xs text-slate-400">Distribuído: {item.distribution_date}</p>
-                            {isDiscrepancy && (
-                              <p className="text-xs text-red-500 font-medium mt-1">
-                                A distribuição não foi enviada porque o processo foi distribuído depois da data que a distribuição foi solicitada
-                              </p>
-                            )}
-                          </div>
-                          <div className="space-y-2">
-                            <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
-                              <Building2 className="h-4 w-4" />
-                              ID da Empresa
-                            </div>
-                            <p className="text-lg font-semibold text-slate-900">
-                              <CompanyTooltip companyId={item.user_company_id} />
-                            </p>
-                          </div>
-                          <div className="flex justify-end">
-                            <CopyMessageButton 
-                              cnj={cnj}
-                              distributionId={item.distribution_id}
-                              distributionDate={item.distribution_date}
-                              distributionSent={item.distribution_sent}
-                              userCompanyId={item.user_company_id}
-                              isDiscrepancy={isDiscrepancy}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )})}
+                    {items.map((item, index) => (
+                      <DistributionCard key={index} item={item} cnj={cnj} />
+                    ))}
                   </div>
                 </CardContent>
               </Card>
