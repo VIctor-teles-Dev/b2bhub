@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { getRegexPatterns } from './actions'
+import { validatePartAgainstCompanies } from './actions'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -14,54 +14,28 @@ export default function RegexValidatorPage() {
   const [partInput, setPartInput] = useState('')
   const [companyIdInput, setCompanyIdInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState<{ success: boolean; message: string } | null>(null)
+  const [results, setResults] = useState<{ companyId: string; success: boolean; matchedRegex?: string; error?: string }[] | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const handleValidate = async () => {
     if (!partInput.trim() || !companyIdInput.trim()) return
 
     setLoading(true)
-    setResult(null)
+    setResults(null)
     setError(null)
 
     try {
-      const response = await getRegexPatterns(companyIdInput)
-
-      if (!response.success || !response.regexps) {
-        setError(response.error || 'Não foi possível obter os regexes da empresa.')
+      // Split by comma or space and filter out empty strings
+      const companyIds = companyIdInput.split(/[\s,]+/).filter(id => id.trim() !== '')
+      
+      if (companyIds.length === 0) {
+        setError('Por favor, insira pelo menos um ID de empresa.')
+        setLoading(false)
         return
       }
 
-      const regexps = response.regexps
-      let matchedRegex = null
-
-      for (const pattern of regexps) {
-        try {
-          // Create regex from string. 
-          // Note: Regex from API might come as string like "^foo$". 
-          // We need to be careful about flags if they are included in the string or not.
-          // Usually API returns just the pattern.
-          const regex = new RegExp(pattern)
-          if (regex.test(partInput)) {
-            matchedRegex = pattern
-            break
-          }
-        } catch (e) {
-          console.warn(`Invalid regex pattern received: ${pattern}`, e)
-        }
-      }
-
-      if (matchedRegex) {
-        setResult({
-          success: true,
-          message: `A parte "${partInput}" digitada corresponde a ${matchedRegex}`
-        })
-      } else {
-        setResult({
-          success: false,
-          message: `A parte "${partInput}" não corresponde a nenhum regex cadastrado.`
-        })
-      }
+      const validationResults = await validatePartAgainstCompanies(partInput, companyIds)
+      setResults(validationResults)
 
     } catch (err) {
       setError('Ocorreu um erro ao validar.')
@@ -86,7 +60,7 @@ export default function RegexValidatorPage() {
             <div className="mb-8">
               <h1 className="text-4xl font-black text-slate-900 mb-3 tracking-tight">Validador de Regex</h1>
               <p className="text-slate-500 text-lg">
-                Valide partes do processo contra os padrões da empresa.
+                Valide partes do processo contra os padrões de múltiplas empresas.
               </p>
             </div>
 
@@ -106,13 +80,13 @@ export default function RegexValidatorPage() {
 
               <div className="space-y-2">
                 <Label htmlFor="companyId" className="text-xs font-bold text-slate-400 uppercase tracking-wider block ml-1">
-                  Digite o Id da empresa
+                  Digite os Ids das empresas (separados por vírgula ou espaço)
                 </Label>
                 <Input
                   id="companyId"
                   value={companyIdInput}
                   onChange={(e) => setCompanyIdInput(e.target.value)}
-                  placeholder="Ex: 123"
+                  placeholder="Ex: 123, 456 789"
                   className="h-14 px-4 text-base bg-slate-50 border border-slate-100 focus:ring-2 focus:ring-[#0A4D3C]/20 focus:border-[#0A4D3C] rounded-xl outline-none transition-all font-mono text-slate-600 placeholder:text-slate-300"
                 />
               </div>
@@ -137,37 +111,47 @@ export default function RegexValidatorPage() {
             </div>
 
             {error && (
-              <div className="p-4 text-sm text-red-600 bg-red-50 rounded-xl border border-red-100 animate-in fade-in slide-in-from-top-2">
+              <div className="p-4 text-sm text-red-600 bg-red-50 rounded-xl border border-red-100 animate-in fade-in slide-in-from-top-2 mb-6">
                 {error}
               </div>
             )}
 
-            {result && (
-              <div className={`p-6 rounded-xl border animate-in fade-in slide-in-from-top-2 flex items-start gap-4 ${
-                result.success 
-                  ? 'bg-emerald-50 border-emerald-100 text-emerald-900' 
-                  : 'bg-red-50 border-red-100 text-red-900'
-              }`}>
-                {result.success ? (
-                  <CheckCircle2 className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5" />
-                ) : (
-                  <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
-                )}
-                <div>
-                  <h3 className={`font-bold text-lg mb-1 ${result.success ? 'text-emerald-700' : 'text-red-700'}`}>
-                    {result.success ? 'Regex Válida' : 'Nenhuma correspondência encontrada'}
-                  </h3>
-                  <p className="text-base leading-relaxed">
-                    {result.message}
-                  </p>
-                </div>
+            {results && (
+              <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                {results.map((result, index) => (
+                  <div 
+                    key={`${result.companyId}-${index}`}
+                    className={`p-6 rounded-xl border flex items-start gap-4 ${
+                      result.success 
+                        ? 'bg-emerald-50 border-emerald-100 text-emerald-900' 
+                        : 'bg-red-50 border-red-100 text-red-900'
+                    }`}
+                  >
+                    {result.success ? (
+                      <CheckCircle2 className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5" />
+                    ) : (
+                      <XCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+                    )}
+                    <div>
+                      <h3 className={`font-bold text-lg mb-1 ${result.success ? 'text-emerald-700' : 'text-red-700'}`}>
+                        Company ID: {result.companyId}. <br></br> {result.success ? 'Regex Válida' : 'Regex Inválida'}
+                      </h3>
+                      <p className="text-base leading-relaxed">
+                        {result.success 
+                          ? `A parte "${partInput}" corresponde a ${result.matchedRegex}`
+                          : (result.error || `A parte "${partInput}" não corresponde a nenhum regex cadastrado.`)
+                        }
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
             <Alert className="mt-8 bg-slate-50 border-none rounded-xl p-6 flex items-start gap-4">
               <Info className="w-6 h-6 text-slate-400 mt-0.5 flex-shrink-0" />
               <AlertDescription className="text-slate-500 text-base leading-relaxed italic">
-                A validação é feita comparando a parte digitada com as expressões regulares (Regex) cadastradas para a empresa informada.
+                A validação é feita comparando a parte digitada com as expressões regulares (Regex) cadastradas para cada empresa informada.
               </AlertDescription>
             </Alert>
 

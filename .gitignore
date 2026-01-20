@@ -42,4 +42,6 @@ next-env.d.ts
 
 #styleguide
 styleguide
-PROXIMAS_TASKS.md
+
+#agent prompts
+.agent
