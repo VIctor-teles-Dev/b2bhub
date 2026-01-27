@@ -83,7 +83,6 @@ B2Bhub/
 │   │   │   ├── actions.ts
 │   │   │   ├── actions.test.ts
 │   │   │   └── page.tsx
-│   │   ├── styleguide/         # Styleguide interno
 │   │   ├── globals.css         # CSS global + Design tokens
 │   │   ├── layout.tsx          # Layout raiz com Sidebar
 │   │   └── page.tsx            # Home page
@@ -113,70 +112,6 @@ B2Bhub/
 
 ---
 
-## 🎨 Design Patterns
-
-### 1. **Server Actions Pattern**
-
-O projeto utiliza **Server Actions** do Next.js para operações assíncronas seguras no servidor:
-
-```typescript
-// src/app/distribution/actions.ts
-"use server";
-
-export async function getDistributionData(cnj: string): Promise<{
-  success: boolean;
-  data?: DistributionData[];
-  error?: string;
-}> {
-  // Lógica executada no servidor
-}
-```
-
-### 2. **Composition Pattern (shadcn/ui)**
-
-Componentes compostos para flexibilidade:
-
-```tsx
-<Card>
-  <CardHeader>
-    <CardTitle>Título</CardTitle>
-    <CardDescription>Descrição</CardDescription>
-  </CardHeader>
-  <CardContent>Conteúdo</CardContent>
-  <CardFooter>Rodapé</CardFooter>
-</Card>
-```
-
-### 3. **Utility Functions Pattern**
-
-Funções utilitárias isoladas com testes:
-
-```typescript
-// src/lib/cnj-utils.ts
-export function extractAndCleanCnj(input: string): string | null;
-export function formatCnj(cleanCnj: string): string;
-```
-
-### 4. **Design Tokens via CSS Variables**
-
-Sistema de cores e espaçamentos definidos em CSS:
-
-```css
-:root {
-  --primary: #006747; /* Jusbrasil Green */
-  --primary-foreground: #ffffff;
-  --sidebar: #f8fafc;
-  /* ... */
-}
-```
-
-### 5. **Co-location Pattern**
-
-Código relacionado colocado junto:
-
-- `page.tsx` + `actions.ts` + `actions.test.ts` na mesma pasta de feature
-
----
 
 ## 🚀 Instalação
 
@@ -344,15 +279,6 @@ bun test src/lib/cnj-utils.test.ts
 Este projeto é **privado** e de uso interno da **Jus Soluções**.
 
 Todos os direitos reservados © 2026 JUS SOLUÇÕES.
-
----
-
-## 📬 Contato
-
-Para dúvidas, sugestões ou suporte técnico:
-
-- **Equipe de Desenvolvimento**: dev@jussoluções.com.br
-- **Repositório**: [GitHub - B2Bhub](https://github.com/seu-usuario/B2Bhub)
 
 ---
 

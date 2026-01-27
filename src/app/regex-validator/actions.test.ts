@@ -1,6 +1,6 @@
 /// <reference types="bun-types" />
 import { describe, expect, test, mock, beforeEach, afterEach } from "bun:test";
-import { getRegexPatterns } from "./actions";
+import { getRegexPatterns, validatePartAgainstCompanies, type ValidationResult } from "./actions";
 
 const originalFetch = global.fetch;
 
@@ -50,7 +50,7 @@ describe("Regex Validator Actions", () => {
 
 
   describe("validatePartAgainstCompanies", () => {
-    const { validatePartAgainstCompanies } = require("./actions");
+
 
     test("should validate against multiple companies", async () => {
       const mockResponse1 = ["^Autor$"];
@@ -70,13 +70,13 @@ describe("Regex Validator Actions", () => {
       
       expect(results).toHaveLength(2);
       
-      const result1 = results.find((r: any) => r.companyId === "123");
-      expect(result1.success).toBe(true);
-      expect(result1.matchedRegex).toBe("^Autor$");
+      const result1 = results.find((r: ValidationResult) => r.companyId === "123")!;
+      expect(result1!.success).toBe(true);
+      expect(result1!.matchedRegex).toBe("^Autor$");
 
-      const result2 = results.find((r: any) => r.companyId === "456");
-      expect(result2.success).toBe(false);
-      expect(result2.error).toBe("Nenhuma correspondência encontrada.");
+      const result2 = results.find((r: ValidationResult) => r.companyId === "456")!;
+      expect(result2!.success).toBe(false);
+      expect(result2!.error).toBe("Nenhuma correspondência encontrada.");
     });
 
     test("should handle API errors for specific companies", async () => {
@@ -91,12 +91,12 @@ describe("Regex Validator Actions", () => {
       
       expect(results).toHaveLength(2);
       
-      const result1 = results.find((r: any) => r.companyId === "123");
-      expect(result1.success).toBe(true);
+      const result1 = results.find((r: ValidationResult) => r.companyId === "123")!;
+      expect(result1!.success).toBe(true);
 
-      const result2 = results.find((r: any) => r.companyId === "999");
-      expect(result2.success).toBe(false);
-      expect(result2.error).toContain("Erro ao consultar API");
+      const result2 = results.find((r: ValidationResult) => r.companyId === "999")!;
+      expect(result2!.success).toBe(false);
+      expect(result2!.error).toContain("Erro ao consultar API");
     });
   });
 });
