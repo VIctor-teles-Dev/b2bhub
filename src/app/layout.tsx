@@ -7,6 +7,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Jusbrasil Design System",
   description: "Design system based on Jusbrasil aesthetic",
+  icons: {
+    icon: "/faviconb2b.jpg",
+  },
 };
 
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"

@@ -12,11 +12,11 @@ export default function Page() {
           Centralize as suas operações e agilize o fluxo jurídico da Jus Soluções.
         </p>
       </div>
-      
+
       <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-    
-    
-        
+
+
+
 
         {/* Card 1: Análisar Destribuições de processos*/}
         <Link href="/distribution" className="contents">
@@ -59,6 +59,28 @@ export default function Page() {
             </CardFooter>
           </Card>
         </Link>
+
+
+        {/* Card 3: Análise de Relatório */}
+        {/* <Link href="/report-analysis" className="contents">
+          <Card className="flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-sidebar-primary/50 cursor-pointer group">
+            <CardHeader className="pb-2">
+              <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-sidebar-accent text-sidebar-primary">
+                <FileSearch className="h-6 w-6" />
+              </div>
+              <CardTitle className="text-xl">Análise de Relatório</CardTitle>
+              <CardDescription className="mt-2 text-base">
+                Extraia dados e métricas de relatórios do Digesto.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1" />
+            <CardFooter>
+              <Button variant="ghost" className="p-0 font-semibold text-sidebar-primary hover:bg-transparent hover:text-sidebar-primary/80">
+                Abrir ferramenta <span className="ml-2">›</span>
+              </Button>
+            </CardFooter>
+          </Card>
+        </Link> */}
 
         {/* Card 5: Em Desenvolvimento */}
         <Card className="flex flex-col border-dashed bg-muted/50">
