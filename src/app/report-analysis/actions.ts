@@ -49,9 +49,13 @@ function isCacheValid(filepath: string): boolean {
 
 /**
  * Ensures the data directory exists
+ * Uses /tmp on Vercel (serverless) since the filesystem is read-only
  */
 function ensureDataDir(): string {
-    const dataDir = path.join(process.cwd(), "data");
+    const isVercel = process.env.VERCEL === "1";
+    const baseDir = isVercel ? "/tmp" : process.cwd();
+    const dataDir = path.join(baseDir, "data");
+
     if (!fs.existsSync(dataDir)) {
         fs.mkdirSync(dataDir, { recursive: true });
     }
