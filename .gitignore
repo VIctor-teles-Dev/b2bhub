@@ -42,3 +42,5 @@ next-env.d.ts
 
 #styleguide
 styleguide
+data
+.agent

@@ -32,11 +32,11 @@ const items = [
     url: "/regex-validator",
     icon: Settings,
   },
- /*{
+ {
     title: "Análise de Relatório",
     url: "/report-analysis",
     icon: FileText,
-  },*/
+  },
 ]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

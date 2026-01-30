@@ -41,9 +41,9 @@ describe("Report Analysis Actions", () => {
     beforeEach(() => {
         process.env.DIGESTO_API_TOKEN = "test-token";
         // Mock FS
-        fs.writeFileSync = mock(() => { }) as any;
-        fs.existsSync = mock(() => false) as any;
-        fs.mkdirSync = mock(() => { }) as any;
+        fs.writeFileSync = mock(() => { }) as typeof fs.writeFileSync;
+        fs.existsSync = mock(() => false) as typeof fs.existsSync;
+        fs.mkdirSync = mock(() => undefined) as typeof fs.mkdirSync;
     });
 
     afterEach(() => {
@@ -68,8 +68,9 @@ describe("Report Analysis Actions", () => {
         if (!startResult.taskId) throw new Error("Task ID not returned");
 
         const status = await checkStatus(startResult.taskId);
+        if ("error" in status) throw new Error("Unexpected error");
+
         expect(status.status).toBeDefined();
-        // It might be PENDING or RUNNING depending on async execution speed
         expect(["PENDING", "RUNNING", "COMPLETED", "ERROR"]).toContain(status.status);
     });
 });

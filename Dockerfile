@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 FROM base AS install
 RUN mkdir -p /temp/dev
 COPY package.json bun.lock /temp/dev/
-RUN cd /temp/dev && bun install --frozen-lockfile
+RUN cd /temp/dev && bun install --frozen-lockfile 
 
 RUN mkdir -p /temp/prod
 COPY package.json bun.lock /temp/prod/
@@ -22,6 +22,9 @@ COPY --from=install /temp/prod/node_modules node_modules
 COPY --from=prerelease /usr/src/app/.next/standalone ./
 COPY --from=prerelease /usr/src/app/.next/static ./.next/static
 COPY --from=prerelease /usr/src/app/public ./public
+
+# Install Playwright browsers and dependencies
+RUN bunx playwright install --with-deps
 
 USER bun
 EXPOSE 3000/tcp

@@ -62,7 +62,7 @@ export default function Page() {
 
 
         {/* Card 3: Análise de Relatório */}
-        {/* <Link href="/report-analysis" className="contents">
+        <Link href="/report-analysis" className="contents">
           <Card className="flex flex-col transition-all duration-200 hover:shadow-lg hover:-translate-y-1 hover:border-sidebar-primary/50 cursor-pointer group">
             <CardHeader className="pb-2">
               <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-sidebar-accent text-sidebar-primary">
@@ -80,7 +80,7 @@ export default function Page() {
               </Button>
             </CardFooter>
           </Card>
-        </Link> */}
+        </Link>
 
         {/* Card 5: Em Desenvolvimento */}
         <Card className="flex flex-col border-dashed bg-muted/50">
