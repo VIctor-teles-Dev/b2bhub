@@ -2,7 +2,9 @@ services:
   web:
     build: .
     ports:
-      - "3000:3000"
+      - "3600:3000"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
     restart: always

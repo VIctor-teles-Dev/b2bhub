@@ -153,6 +153,16 @@ B2Bhub/
 
    Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
 
+   Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
+
+### Docker (Produção)
+
+Para rodar via Docker, utilizamos uma imagem customizada baseada em Debian para garantir compatibilidade do Bun:
+
+```bash
+docker-compose up -d --build
+```
+
 ---
 
 ## 📜 Scripts Disponíveis

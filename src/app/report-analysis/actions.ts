@@ -4,9 +4,10 @@ import { chromium, Browser, Page, BrowserContext } from "playwright";
 import fs from "fs";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
+import { CONFIG } from "./actions.config";
 
 import {
-    MAX_RETRIES,
+    MAX_RETRIES as OLD_MAX_RETRIES,
     RETRY_DELAY_MS,
     CACHE_TTL_MS,
     MAX_CONCURRENT_CONTEXTS,
@@ -16,6 +17,9 @@ import {
 } from "./config";
 import { getTribunalFromCnj } from "./court-mapping";
 import type { TaskState, ReportStats, ReportData, StartScrapingResult } from "./types";
+
+// Use settings from CONFIG where available, fallback to config.ts
+const { MAX_RETRIES = OLD_MAX_RETRIES, RETRY_DELAY = RETRY_DELAY_MS, PARALLEL_LIMIT = MAX_CONCURRENT_CONTEXTS } = CONFIG;
 
 // Task storage using Map for better performance
 const TASKS: Map<string, TaskState> = new Map();
@@ -123,43 +127,29 @@ class ScraperService {
                 args: [...BROWSER_ARGS],
             });
 
-            // Filter out cached reports first
-            const uncachedIds: string[] = [];
-            for (const reportId of reportIds) {
-                const filename = path.join(dataDir, `report_${reportId}_numbers.json`);
-                if (isCacheValid(filename)) {
-                    results.push(filename);
-                } else {
-                    uncachedIds.push(reportId);
-                }
-            }
+            let processedCount = 0;
 
-            // Process uncached reports in parallel batches
-            const batches = chunkArray(uncachedIds, MAX_CONCURRENT_CONTEXTS);
-            let processed = results.length;
-
-            for (const batch of batches) {
-                task.message = `Processando ${processed + 1}-${Math.min(processed + batch.length, total)}`;
-
-                const batchResults = await Promise.allSettled(
-                    batch.map(reportId => this.processWithRetry(browser!, reportId, dataDir))
-                );
-
-                for (let i = 0; i < batchResults.length; i++) {
-                    const result = batchResults[i];
-                    const reportId = batch[i];
-
-                    if (result.status === "fulfilled" && result.value) {
-                        results.push(result.value);
-                    } else if (result.status === "rejected") {
-                        errors.push(`ID ${reportId}: ${result.reason?.message || "Erro desconhecido"}`);
+            const processReport = async (reportId: string): Promise<void> => {
+                try {
+                    const result = await this.processWithRetry(browser!, reportId, dataDir);
+                    if (result) {
+                        results.push(result);
                     } else {
-                        errors.push(`ID ${reportId}: Sem dados`);
+                        errors.push(`ID ${reportId}: Sem dados ou erro após tentativas`);
+                    }
+                } catch (e: any) {
+                    errors.push(`ID ${reportId}: ${e.message}`);
+                } finally {
+                    processedCount++;
+                    const currentTask = TASKS.get(taskId);
+                    if (currentTask) {
+                        currentTask.message = `Processando ${processedCount}/${total} (${PARALLEL_LIMIT} em paralelo)`;
                     }
                 }
+            };
 
-                processed += batch.length;
-            }
+            // Run with concurrency limit
+            await this.runWithConcurrencyLimit(reportIds, processReport, PARALLEL_LIMIT);
 
             task.stats = this.calculateStats(results);
             task.result = results;
@@ -176,6 +166,30 @@ class ScraperService {
         }
     }
 
+    /**
+     * Executes async tasks with a concurrency limit (Promise pooling).
+     */
+    private async runWithConcurrencyLimit<T>(
+        items: T[],
+        fn: (item: T) => Promise<void>,
+        limit: number
+    ): Promise<void> {
+        const executing: Promise<void>[] = [];
+
+        for (const item of items) {
+            const promise = fn(item).then(() => {
+                executing.splice(executing.indexOf(promise), 1);
+            });
+            executing.push(promise);
+
+            if (executing.length >= limit) {
+                await Promise.race(executing);
+            }
+        }
+
+        await Promise.all(executing);
+    }
+
     private async processWithRetry(
         browser: Browser,
         reportId: string,
@@ -183,13 +197,17 @@ class ScraperService {
     ): Promise<string | null> {
         const filename = path.join(dataDir, `report_${reportId}_numbers.json`);
 
+        if (isCacheValid(filename)) {
+            return filename;
+        }
+
         for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             try {
                 const data = await this.processSingleReport(browser, reportId);
 
                 if (!data?.numbers) {
                     if (attempt === MAX_RETRIES) return null;
-                    await delay(RETRY_DELAY_MS * attempt);
+                    await delay(RETRY_DELAY * attempt);
                     continue;
                 }
 
@@ -198,7 +216,7 @@ class ScraperService {
 
             } catch (e: unknown) {
                 if (attempt < MAX_RETRIES) {
-                    await delay(RETRY_DELAY_MS * attempt);
+                    await delay(RETRY_DELAY * attempt);
                     continue;
                 }
                 const errorMessage = e instanceof Error ? e.message : "Erro desconhecido";
@@ -441,8 +459,8 @@ class ScraperService {
                     progress,
                 });
 
-            } catch {
-                // Skip invalid files
+            } catch (err) {
+                console.error(`Error calculating stats for ${filename}:`, err);
             }
         }
 

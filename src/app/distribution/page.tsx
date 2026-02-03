@@ -117,13 +117,6 @@ export default function DistributionPage() {
                 </Button>
               </div>
             </div>
-
-            <Alert className="bg-slate-50 border-none rounded-xl p-6 flex items-start gap-4">
-              <Info className="w-6 h-6 text-slate-400 mt-0.5 flex-shrink-0" />
-              <AlertDescription className="text-slate-500 text-base leading-relaxed italic">
-                A nossa ferramenta utiliza o padrão estabelecido pela Resolução CNJ nº 65/2008 para identificar e formatar automaticamente o número do processo antes da consulta.
-              </AlertDescription>
-            </Alert>
           </CardContent>
         </Card>
 

@@ -32,11 +32,6 @@ mock.module("playwright", () => ({
     },
 }));
 
-// Mock fs to avoid writing to disk during tests
-const originalWriteFileSync = fs.writeFileSync;
-const originalExistsSync = fs.existsSync;
-const originalMkdirSync = fs.mkdirSync;
-
 describe("Report Analysis Actions", () => {
     beforeEach(() => {
         process.env.DIGESTO_API_TOKEN = "test-token";
@@ -47,9 +42,7 @@ describe("Report Analysis Actions", () => {
     });
 
     afterEach(() => {
-        fs.writeFileSync = originalWriteFileSync;
-        fs.existsSync = originalExistsSync;
-        fs.mkdirSync = originalMkdirSync;
+        // Cleanup if necessary
     });
 
     test("startScraping should return error if no IDs provided", async () => {
