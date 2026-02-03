@@ -49,7 +49,7 @@ export function CopyMessageButton({
       message += `\n \n Caso tenha alguma dúvida, entre em contato com o suporte.`
 
       await navigator.clipboard.writeText(message)
-      
+
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
@@ -66,7 +66,7 @@ export function CopyMessageButton({
       onClick={handleCopy}
       disabled={loading}
       className={`
-        transition-all duration-200 
+        transition-all duration-200 whitespace-nowrap
         ${copied ? 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100' : 'hover:bg-slate-50'}
       `}
     >

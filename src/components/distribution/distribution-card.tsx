@@ -1,6 +1,5 @@
 
-import { Calendar, Building2, Hash } from 'lucide-react'
-import { CompanyTooltip } from '@/app/distribution/company-tooltip'
+import { Calendar, Building2, Hash, Bell } from 'lucide-react'
 import { CopyMessageButton } from '@/app/distribution/copy-message-button'
 import { isSentBeforeDistributed } from '@/lib/date-utils'
 
@@ -9,7 +8,9 @@ interface DistributionResult {
   distribution_id: string
   distribution_sent: string
   distribution_date: string
+  notified_at: string
   user_company_id: number
+  user_company_name: string
 }
 
 interface DistributionCardProps {
@@ -22,40 +23,62 @@ export function DistributionCard({ item, cnj }: DistributionCardProps) {
 
   return (
     <div className="p-6 hover:bg-slate-50/50 transition-colors">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
-            <Hash className="h-4 w-4" />
-            ID da Distribuição
+      <div className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">
+        {/* Info Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 flex-1 min-w-0">
+          {/* ID da Distribuição */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <Hash className="h-4 w-4 flex-shrink-0" />
+              <span className="truncate">ID Distribuição</span>
+            </div>
+            <p className="text-base font-semibold text-slate-900">{item.distribution_id}</p>
           </div>
-          <p className="text-lg font-semibold text-slate-900">{item.distribution_id}</p>
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
-            <Calendar className="h-4 w-4" />
-            Data de Envio
-          </div>
-          <p className={`text-lg font-semibold ${isDiscrepancy ? 'text-red-600' : 'text-slate-900'}`}>
-            {item.distribution_sent}
-          </p>
-          <p className="text-xs text-slate-400">Distribuído: {item.distribution_date}</p>
-          {isDiscrepancy && (
-            <p className="text-xs text-red-500 font-medium mt-1">
-              A distribuição não foi enviada porque o processo foi distribuído depois da data que a distribuição foi solicitada
+
+          {/* Criado em */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <Calendar className="h-4 w-4 flex-shrink-0" />
+              <span>Criado em</span>
+            </div>
+            <p className={`text-base font-semibold ${isDiscrepancy ? 'text-red-600' : 'text-slate-900'}`}>
+              {item.distribution_sent}
             </p>
-          )}
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
-            <Building2 className="h-4 w-4" />
-            ID da Empresa
+            <p className="text-xs text-slate-400">Dist: {item.distribution_date}</p>
+            {isDiscrepancy && (
+              <p className="text-xs text-red-500 font-medium mt-1">
+                Posterior à solicitação
+              </p>
+            )}
           </div>
-          <p className="text-lg font-semibold text-slate-900">
-            <CompanyTooltip companyId={item.user_company_id} />
-          </p>
+
+          {/* Notificado em */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <Bell className="h-4 w-4 flex-shrink-0" />
+              <span>Notificado em</span>
+            </div>
+            <p className="text-base font-semibold text-slate-900">
+              {item.notified_at}
+            </p>
+          </div>
+
+          {/* Dados da Empresa */}
+          <div className="space-y-1 min-w-0">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <Building2 className="h-4 w-4 flex-shrink-0" />
+              <span>Empresa</span>
+            </div>
+            <p className="text-base font-semibold text-slate-900">{item.user_company_id}</p>
+            <p className="text-sm text-slate-600 truncate" title={item.user_company_name}>
+              {item.user_company_name}
+            </p>
+          </div>
         </div>
-        <div className="flex justify-end">
-          <CopyMessageButton 
+
+        {/* Botão Copiar - Separado do grid */}
+        <div className="flex lg:items-start lg:justify-end flex-shrink-0">
+          <CopyMessageButton
             cnj={cnj}
             distributionId={item.distribution_id}
             distributionDate={item.distribution_date}
