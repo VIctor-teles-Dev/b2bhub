@@ -1,5 +1,6 @@
 import * as React from "react"
-import { Home, Search, FileText, Inbox, Settings } from "lucide-react"
+import { Home, Search, FileText, Inbox, Settings, LogOut } from "lucide-react"
+import { logout } from "@/app/login/actions"
 
 import {
   Sidebar,
@@ -65,6 +66,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <div className="text-xs text-muted-foreground text-center">
           © 2026 JUS SOLUÇÕES
         </div>
+        <SidebarMenu>
+          <SidebarMenuItem>
+             <SidebarMenuButton asChild>
+                <form action={logout} className="w-full">
+                  <button type="submit" className="flex w-full items-center gap-2">
+                    <LogOut />
+                    <span>Sair</span>
+                  </button>
+                </form>
+             </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
