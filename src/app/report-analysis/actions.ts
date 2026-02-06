@@ -243,13 +243,55 @@ class ScraperService {
             await this.applyFilter(page);
             await this.setPagination(page);
 
+            // Set to store unique numbers across all pages
+            const allNumbers = new Set<string>();
+            let hasNextPage = true;
+            let pageIndex = 1;
+
+            while (hasNextPage) {
+                // Extract data from current page
+                const pageNumbers = await this.extractData(page);
+                pageNumbers.forEach(num => allNumbers.add(num));
+                
+                // Try to go to next page
+                hasNextPage = await this.goToNextPage(page);
+                if (hasNextPage) {
+                    pageIndex++;
+                    // Wait for grid to refresh
+                    await delay(3000); 
+                }
+            }
+
             return {
-                numbers: await this.extractData(page),
+                numbers: Array.from(allNumbers),
                 progress: await this.extractProgress(page),
             };
 
         } finally {
             await context.close();
+        }
+    }
+
+    private async goToNextPage(page: Page): Promise<boolean> {
+        try {
+            // Check for the next page button
+            // The class usually indicates state. If disabled, it might have a disabled class or attribute.
+            const nextButton = page.locator(".ui-grid-pager-next");
+            
+            if (await nextButton.count() === 0) return false;
+            
+            // Check if disabled
+            const isDisabled = await nextButton.evaluate((btn) => {
+                return btn.hasAttribute("disabled") || btn.classList.contains("disabled") || btn.parentElement?.classList.contains("disabled");
+            });
+
+            if (isDisabled) return false;
+
+            await nextButton.click();
+            return true;
+        } catch (e) {
+            console.error("Error navigating to next page:", e);
+            return false;
         }
     }
 
@@ -439,12 +481,14 @@ class ScraperService {
                 const numbers: string[] = Array.isArray(data) ? data : data.numbers ?? [];
                 const progress: string = Array.isArray(data) ? "100%" : data.progress ?? "100%";
 
+                const validNumbers: string[] = [];
                 let totalAtrasados = 0;
                 const tribunaisCount: Record<string, number> = {};
 
                 for (const num of numbers) {
                     const tribunal = getTribunalFromCnj(num);
                     if (tribunal) {
+                        validNumbers.push(num);
                         totalAtrasados++;
                         tribunaisCount[tribunal] = (tribunaisCount[tribunal] ?? 0) + 1;
                     }
@@ -457,6 +501,7 @@ class ScraperService {
                     tribunais: tribunaisCount,
                     total_tribunais: Object.keys(tribunaisCount).length,
                     progress,
+                    numbers: validNumbers,
                 });
 
             } catch (err) {

@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Search, AlertTriangle } from "lucide-react";
+import { Loader2, Search, AlertTriangle, PieChart } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { startScraping, checkStatus } from "./actions";
-import { ReportCard, LoadingState } from "./components";
+import { ReportCard, LoadingState, SummaryDetails } from "./components";
 import type { ReportStats, TaskState } from "./types";
 
 const POLLING_INTERVAL_MS = 2000;
@@ -75,7 +75,7 @@ export default function ReportAnalysisPage() {
         <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 py-12 bg-slate-50/30">
             <div className="w-full max-w-5xl space-y-8">
                 {/* Header */}
-                <div className="text-center space-y-3 mb-12">
+                <div className="text-center space-y-3 mb-12 relative">
                     <h1 className="text-4xl font-black text-slate-900 tracking-tight">
                         Análise de Relatórios
                     </h1>
@@ -83,6 +83,21 @@ export default function ReportAnalysisPage() {
                         Cole os IDs dos relatórios do Digesto para extrair automaticamente as métricas
                         de atraso e distribuição por tribunal.
                     </p>
+
+                    {/* Summary Button */}
+                    {taskStatus?.stats && taskStatus.stats.length > 0 && (
+                        <div className="mt-8 flex justify-center animate-in fade-in slide-in-from-top-4 duration-500">
+                            <SummaryDetails stats={taskStatus.stats}>
+                                <Button 
+                                    size="lg" 
+                                    className="bg-[#0A4D3C] hover:bg-[#083828] text-white shadow-lg shadow-emerald-900/10 rounded-full px-8 h-12 text-base"
+                                >
+                                    <PieChart className="mr-2 h-5 w-5" />
+                                    Ver Resumo Consolidado
+                                </Button>
+                            </SummaryDetails>
+                        </div>
+                    )}
                 </div>
 
                 {/* Main Card */}
@@ -144,9 +159,11 @@ export default function ReportAnalysisPage() {
                         {/* Results Grid */}
                         {taskStatus?.stats && taskStatus.stats.length > 0 && (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-in fade-in slide-in-from-top-8 duration-500">
-                                {taskStatus.stats.map((stat) => (
-                                    <ReportCard key={stat.report_id} stat={stat} />
-                                ))}
+                                {[...taskStatus.stats]
+                                    .sort((a, b) => b.total_atrasados - a.total_atrasados)
+                                    .map((stat) => (
+                                        <ReportCard key={stat.report_id} stat={stat} />
+                                    ))}
                             </div>
                         )}
                     </CardContent>

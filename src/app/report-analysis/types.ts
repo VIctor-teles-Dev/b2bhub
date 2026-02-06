@@ -22,6 +22,7 @@ export interface ReportStats {
     tribunais: Record<string, number>;
     total_tribunais: number;
     progress: string;
+    numbers: string[];
 }
 
 /** Data extracted from a report page */

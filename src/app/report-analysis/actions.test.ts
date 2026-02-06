@@ -11,16 +11,21 @@ mock.module("playwright", () => ({
                     goto: async () => { },
                     waitForTimeout: async () => { },
                     waitForLoadState: async () => { },
-                    locator: () => ({
+                    locator: (selector: string) => ({
                         isVisible: async () => false,
                         click: async () => { },
                         hover: async () => { },
                         all: async () => [],
-                        count: async () => 0,
+                        count: async () => {
+                            // Avoid infinite pagination loop in tests by saying next button doesn't exist
+                            if (selector === ".ui-grid-pager-next") return 0;
+                            return 0;
+                        },
                         first: () => ({ innerText: async () => "100%" }),
                         last: () => ({ innerText: async () => "100%" }),
                         filter: () => ({ first: () => ({ count: async () => 0, click: async () => { } }) }),
                         selectOption: async () => { },
+                        evaluate: async () => false, // For isDisabled check
                     }),
                     evaluate: async () => [],
                     waitForSelector: async () => { },
@@ -39,6 +44,8 @@ describe("Report Analysis Actions", () => {
         fs.writeFileSync = mock(() => { }) as typeof fs.writeFileSync;
         fs.existsSync = mock(() => false) as typeof fs.existsSync;
         fs.mkdirSync = mock(() => undefined) as typeof fs.mkdirSync;
+        fs.readFileSync = mock(() => JSON.stringify({ numbers: ["0000000-00.2023.8.05.0000"], progress: "100%" })) as any;
+        fs.statSync = mock(() => ({ mtimeMs: Date.now() })) as any;
     });
 
     afterEach(() => {
@@ -52,7 +59,7 @@ describe("Report Analysis Actions", () => {
 
     test("startScraping should return taskId for valid input", async () => {
         const result = await startScraping("123456");
-        expect(result.taskId).toBeDefined();
+     expect(result.taskId).toBeDefined();
         expect(result.status).toBe("PENDING");
     });
 
